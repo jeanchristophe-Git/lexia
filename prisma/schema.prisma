@@ -1,0 +1,51 @@
+// Prisma Schema pour LexIA
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modèle Utilisateur
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  conversations Conversation[]
+}
+
+// Modèle Conversation (historique des chats)
+model Conversation {
+  id            String    @id @default(uuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  sessionId     String    // ID de session pour grouper les messages
+  question      String
+  answer        String
+  confidence    Float     @default(0.0)
+  sources       String?   // JSON stringifié
+  createdAt     DateTime  @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Modèle Document Juridique (metadata)
+model LegalDocument {
+  id             String   @id @default(uuid())
+  title          String
+  category       String   // constitution, code_investissement, etc.
+  articleNumber  String?
+  contentPreview String?  // Extrait du contenu
+  sourceUrl      String?
+  scrapedAt      DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@index([category])
+}
