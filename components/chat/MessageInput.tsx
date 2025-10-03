@@ -94,7 +94,7 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white">
+    <div className="border-t border-claude-border bg-claude-sidebar">
       <div className="px-4 pb-4 pt-2">
         <form onSubmit={handleSubmit}>
           <div className="flex items-end space-x-3 max-w-4xl mx-auto">
@@ -106,14 +106,14 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 disabled={isTyping}
-                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-0 min-h-[50px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full resize-none rounded-xl border border-claude-border bg-claude-bg-main px-4 py-3 pr-12 text-sm text-claude-text-light placeholder:text-claude-text-secondary focus:border-claude-user-bubble focus:outline-none focus:ring-0 min-h-[50px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
                 rows={1}
               />
 
               <button
                 type="submit"
                 disabled={!input.trim() || isTyping}
-                className="absolute right-2 bottom-2 h-8 w-8 rounded-full p-0 bg-blue-600 hover:bg-opacity-80 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="absolute right-2 bottom-2 h-8 w-8 rounded-full p-0 bg-claude-user-bubble hover:bg-blue-600 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isTyping ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -132,7 +132,7 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
               <button
                 key={index}
                 onClick={() => setInput(suggestion)}
-                className="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors"
+                className="px-3 py-1 text-xs rounded-full bg-claude-border hover:bg-claude-assistant-bubble text-claude-text-secondary hover:text-claude-text-light transition-colors"
               >
                 {suggestion}
               </button>

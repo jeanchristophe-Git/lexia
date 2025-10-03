@@ -11,19 +11,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Palette Claude.ai
+        // VRAIES couleurs Claude.ai
         claude: {
-          primary: '#CC785C',
-          'primary-dark': '#B5644A',
-          'primary-light': '#E09780',
+          'user-bubble': '#2B5CE6', // Bleu vif pour messages utilisateur
+          'assistant-bubble': '#2A2A2A', // Gris foncé pour messages assistant
+          'bg-main': '#0F0F0F', // Fond principal noir
+          'sidebar': '#171717', // Sidebar gris très foncé
+          'border': '#2A2A2A', // Bordures grises
+          'text-light': '#E5E5E5', // Texte clair
+          'text-secondary': '#9CA3AF', // Texte secondaire
         },
-        background: '#FFFFFF',
-        surface: '#F5F5F5',
-        border: '#E5E5E5',
-        text: {
-          primary: '#1F1F1F',
-          secondary: '#666666',
-        }
       },
       fontFamily: {
         sans: ["Poppins", "Inter", "sans-serif"],

@@ -46,29 +46,29 @@ export default function WelcomeScreen() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto px-4">
-      {/* Logo et titre - style ChatGPT */}
+      {/* Logo et titre - style Claude dark */}
       <div className="text-center mb-8">
         <div className="mb-4 flex justify-center">
-          <div className="w-12 h-12 bg-claude-primary rounded-full flex items-center justify-center text-white text-xl font-semibold">
+          <div className="w-12 h-12 bg-claude-assistant-bubble rounded-full flex items-center justify-center text-white text-xl font-semibold">
             ⚖️
           </div>
         </div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        <h1 className="text-2xl font-semibold text-claude-text-light mb-2">
           Assistant Juridique {selectedCountry.flag} {selectedCountry.name}
         </h1>
-        <p className="text-gray-600 text-base">
+        <p className="text-claude-text-secondary text-base">
           Posez vos questions sur le droit {selectedCountry.code === 'ci' ? 'ivoirien' : selectedCountry.code === 'cm' ? 'camerounais' : 'togolais'}
         </p>
       </div>
 
-      {/* Suggestions - style ChatGPT (chips simples) */}
+      {/* Suggestions - style Claude dark */}
       <div className="w-full mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {getExampleQuestions().map((question, index) => (
             <button
               key={index}
               onClick={() => handleQuestionClick(question)}
-              className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm text-gray-900 bg-white"
+              className="p-4 text-left border border-claude-border rounded-lg hover:bg-claude-sidebar hover:border-claude-user-bubble transition-colors text-sm text-claude-text-light bg-claude-sidebar"
             >
               {question}
             </button>
@@ -76,8 +76,8 @@ export default function WelcomeScreen() {
         </div>
       </div>
 
-      {/* Disclaimer discret - style ChatGPT */}
-      <div className="text-center text-xs text-gray-500 max-w-md">
+      {/* Disclaimer discret - style Claude dark */}
+      <div className="text-center text-xs text-claude-text-secondary max-w-md">
         <p>
           Information générale sur le droit {selectedCountry.code === 'ci' ? 'ivoirien' : selectedCountry.code === 'cm' ? 'camerounais' : 'togolais'}.
           Consultez un avocat inscrit au barreau pour validation juridique.

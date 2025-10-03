@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Mic } from 'lucide-react';
+import { Sparkles, Mic, Menu } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useChatStore } from '@/store/chatStore';
 
 export default function HomePage() {
   const [query, setQuery] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { messages, sendMessage } = useChatStore();
 
   const recentGoals = [
@@ -29,8 +30,18 @@ export default function HomePage() {
   // Si des messages existent, afficher le ChatInterface
   if (messages.length > 0) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar isOpen={true} onClose={() => {}} />
+      <div className="flex h-screen bg-claude-bg-main">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        {/* Hamburger Menu Button - Mobile only */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="md:hidden fixed top-4 left-4 z-30 p-2 bg-claude-sidebar rounded-lg text-claude-text-light hover:bg-claude-border transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
         <ChatInterface />
       </div>
     );
@@ -38,42 +49,51 @@ export default function HomePage() {
 
   // Sinon, afficher l'écran d'accueil
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-claude-bg-main">
       {/* Sidebar */}
-      <Sidebar isOpen={true} onClose={() => {}} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {/* Hamburger Menu Button - Mobile only */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-30 p-2 bg-claude-sidebar rounded-lg text-claude-text-light hover:bg-claude-border transition-colors"
+        aria-label="Open menu"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 py-10">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
             {/* Welcome Section */}
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-claude-primary/10 text-claude-primary text-xs font-medium rounded-full mb-5">
+            <div className="text-center mb-8 md:mb-12">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-claude-user-bubble/20 text-claude-user-bubble text-xs font-medium rounded-full mb-4 md:mb-6">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Intelligence Artificielle Juridique</span>
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-3 leading-tight">
+              <h1 className="text-3xl md:text-4xl font-bold text-claude-text-light mb-3 leading-tight">
                 Bienvenue sur LexIA
               </h1>
-              <p className="text-base text-gray-600 max-w-xl mx-auto leading-relaxed">
+              <p className="text-sm md:text-base text-claude-text-secondary max-w-xl mx-auto leading-relaxed">
                 Obtenez instantanément des réponses précises sur la législation ivoirienne. Gagnez du temps et lancez votre business en conformité totale avec la loi.
               </p>
             </div>
 
             {/* Recent Goals */}
-            <div className="mb-8">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3.5">Recherches récentes</h2>
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-xs md:text-sm font-semibold text-claude-text-light mb-3">Recherches récentes</h2>
               <div className="space-y-2.5">
                 {recentGoals.map((goal, index) => (
                   <div
                     key={index}
                     onClick={() => handleQuickStart(goal.title)}
-                    className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group"
+                    className="bg-claude-sidebar border border-claude-border rounded-xl p-3 md:p-4 hover:border-claude-user-bubble hover:shadow-lg transition-all cursor-pointer group"
                   >
-                    <h3 className="text-sm font-medium text-gray-900 mb-1 group-hover:text-claude-primary transition-colors">
+                    <h3 className="text-xs md:text-sm font-medium text-claude-text-light mb-1 group-hover:text-claude-user-bubble transition-colors">
                       {goal.title}
                     </h3>
-                    <p className="text-xs text-gray-500 leading-relaxed">
+                    <p className="text-[11px] md:text-xs text-claude-text-secondary leading-relaxed">
                       {goal.subtitle}
                     </p>
                   </div>
@@ -82,12 +102,12 @@ export default function HomePage() {
             </div>
 
             {/* AI Input Box */}
-            <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 rounded-2xl p-6 border border-purple-100/50 shadow-sm">
+            <div className="bg-claude-sidebar/50 rounded-2xl p-4 md:p-6 border border-claude-border shadow-lg">
               <div className="mb-4">
-                <div className="inline-block px-2.5 py-1 bg-white/90 backdrop-blur-sm text-[11px] font-medium text-gray-700 rounded-full mb-2.5 shadow-sm">
+                <div className="inline-block px-2.5 py-1 bg-claude-assistant-bubble text-[11px] font-medium text-claude-text-secondary rounded-full mb-2.5">
                   Recherche juridique • Assistant IA • Législation CI
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-base md:text-lg font-semibold text-claude-text-light mb-1">
                   Posez votre question juridique
                 </h3>
               </div>
@@ -104,11 +124,11 @@ export default function HomePage() {
                     }
                   }}
                   placeholder="Comment créer une entreprise en Côte d'Ivoire ?"
-                  className="w-full px-4 py-3.5 pr-28 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-claude-primary focus:border-transparent text-gray-900 placeholder-gray-400 text-[13px] shadow-sm"
+                  className="w-full px-4 py-3 md:py-3.5 pr-24 md:pr-28 bg-claude-bg-main border border-claude-border rounded-xl focus:outline-none focus:ring-2 focus:ring-claude-user-bubble focus:border-transparent text-claude-text-light placeholder-claude-text-secondary text-xs md:text-[13px]"
                 />
                 <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <Mic className="w-4 h-4 text-gray-400" />
+                  <button className="p-2 hover:bg-claude-border rounded-lg transition-colors">
+                    <Mic className="w-4 h-4 text-claude-text-secondary" />
                   </button>
                   <button
                     onClick={() => {
@@ -118,9 +138,9 @@ export default function HomePage() {
                       }
                     }}
                     disabled={!query.trim()}
-                    className="px-4 py-2 bg-claude-primary hover:bg-claude-primary-dark text-white text-xs font-semibold rounded-lg hover:shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 md:px-4 py-2 bg-claude-user-bubble hover:bg-blue-600 text-white text-xs font-semibold rounded-lg hover:shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span>Envoyer</span>
+                    <span className="hidden md:inline">Envoyer</span>
                     <Sparkles className="w-3.5 h-3.5" />
                   </button>
                 </div>
