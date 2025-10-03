@@ -1,19 +1,16 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { ChatStore, Message, Conversation, Country } from '@/types';
 import { generateId } from '@/lib/utils';
 import { DEFAULT_COUNTRY } from '@/lib/countries';
 
-export const useChatStore = create<ChatStore>()(
-  persist(
-    (set, get) => ({
-      // State
-      messages: [],
-      conversations: [],
-      currentConversationId: null,
-      selectedCountry: DEFAULT_COUNTRY,
-      isTyping: false,
-      sidebarOpen: false,
+export const useChatStore = create<ChatStore>()((set, get) => ({
+  // State
+  messages: [],
+  conversations: [],
+  currentConversationId: null,
+  selectedCountry: DEFAULT_COUNTRY,
+  isTyping: false,
+  sidebarOpen: false,
 
       // Actions
       addMessage: (messageData) => {
@@ -87,17 +84,34 @@ export const useChatStore = create<ChatStore>()(
         }
       },
 
-      deleteConversation: (id) => {
+      deleteConversation: async (id) => {
         const { conversations, currentConversationId } = get();
-        const updatedConversations = conversations.filter((conv) => conv.id !== id);
 
-        set({
-          conversations: updatedConversations,
-          ...(currentConversationId === id && {
-            currentConversationId: null,
-            messages: [],
-          }),
-        });
+        // Supprimer de la BDD via API
+        try {
+          const response = await fetch(`/api/conversations/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la suppression');
+          }
+
+          // Supprimer du store local uniquement si la suppression BDD a réussi
+          const updatedConversations = conversations.filter((conv) => conv.id !== id);
+
+          set({
+            conversations: updatedConversations,
+            ...(currentConversationId === id && {
+              currentConversationId: null,
+              messages: [],
+            }),
+          });
+
+        } catch (error) {
+          console.error('Erreur suppression conversation:', error);
+          alert('Erreur lors de la suppression de la conversation');
+        }
       },
 
       clearCurrentChat: () => {
@@ -106,16 +120,72 @@ export const useChatStore = create<ChatStore>()(
           currentConversationId: null,
         });
       },
-    }),
-    {
-      name: 'legal-chat-storage',
-      partialize: (state) => ({
-        conversations: state.conversations,
-        selectedCountry: state.selectedCountry,
-      }),
-    }
-  )
-);
+
+      // Charger les conversations depuis la BDD
+      loadConversationsFromDB: async () => {
+        try {
+          const response = await fetch('/api/conversations');
+          const data = await response.json();
+
+          if (data.conversations) {
+            set({ conversations: data.conversations });
+          }
+        } catch (error) {
+          console.error('Erreur chargement conversations:', error);
+        }
+      },
+
+      // Envoyer un message
+      sendMessage: async (content: string) => {
+        const { currentConversationId, selectedCountry, addMessage, createConversation, setTyping } = get();
+
+        // Créer une conversation si elle n'existe pas
+        if (!currentConversationId) {
+          createConversation(content.length > 50 ? content.substring(0, 50) + '...' : content);
+        }
+
+        // Ajouter le message utilisateur
+        addMessage({
+          role: 'user',
+          content,
+        });
+
+        // Activer l'indicateur de frappe
+        setTyping(true);
+
+        try {
+          // Appeler l'API
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              question: content,
+              session_id: currentConversationId || generateId(),
+            }),
+          });
+
+          const data = await response.json();
+
+          // Ajouter la réponse de l'assistant
+          addMessage({
+            role: 'assistant',
+            content: data.answer || 'Désolé, je n\'ai pas pu générer une réponse.',
+            sources: data.sources || [],
+          });
+        } catch (error) {
+          console.error('Erreur lors de l\'envoi du message:', error);
+          addMessage({
+            role: 'assistant',
+            content: 'Désolé, une erreur s\'est produite. Veuillez réessayer.',
+            sources: [],
+          });
+        } finally {
+          setTyping(false);
+        }
+      },
+    }));
 
 // Mock API calls
 export async function sendMessage(message: string, country: string): Promise<{

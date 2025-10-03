@@ -63,4 +63,6 @@ export interface ChatStore {
   loadConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
   clearCurrentChat: () => void;
+  loadConversationsFromDB: () => Promise<void>;
+  sendMessage: (content: string) => Promise<void>;
 }
