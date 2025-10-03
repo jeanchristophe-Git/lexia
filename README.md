@@ -6,14 +6,14 @@ Assistant IA juridique spécialisé dans la législation ivoirienne, combinant s
 
 **LexIA** est un système complet qui :
 1. **Scrape** les sites officiels ivoiriens (Journal Officiel, CEPICI, DGI)
-2. **Stocke** les données dans PostgreSQL (Prisma) + ChromaDB (recherche vectorielle)
+2. **Stocke** les données dans PostgreSQL (Prisma) + Neon Vector (recherche vectorielle)
 3. **Répond** aux questions avec Groq en utilisant le RAG (Retrieval-Augmented Generation)
 4. **Interface** moderne type ChatGPT pour l'expérience utilisateur
 
 ### Le flow complet
 
 ```
-Utilisateur → Next.js API → ChromaDB (recherche) → Groq (génération) → Réponse + Sources
+Utilisateur → Next.js API → Neon Vector (recherche) → Groq (génération) → Réponse + Sources
                   ↓
             PostgreSQL (stockage)
                   ↑
@@ -40,7 +40,7 @@ Utilisateur → Next.js API → ChromaDB (recherche) → Groq (génération) →
 
 ### Backend & IA
 - **Groq** (LLaMA 3.1 70B) pour la génération de réponses
-- **ChromaDB** pour la recherche vectorielle (embeddings)
+- **Neon Vector (pgvector)** pour la recherche vectorielle (embeddings)
 - **PostgreSQL** + **Prisma** pour le stockage structuré
 - **Python** pour le scraping (BeautifulSoup/Selenium)
 
@@ -48,31 +48,27 @@ Utilisateur → Next.js API → ChromaDB (recherche) → Groq (génération) →
 
 ```
 legit/
-├── src/                          # Frontend Next.js
-│   ├── app/
-│   │   ├── api/chat/route.ts     # API route pour Groq + ChromaDB
-│   │   ├── layout.tsx            # Layout principal
-│   │   └── page.tsx              # Interface chat
-│   ├── components/
-│   │   ├── chat/                 # Composants chat
-│   │   ├── layout/               # Header/Sidebar
-│   │   └── legal/                # Composants juridiques
-│   ├── lib/
-│   │   ├── chromadb.ts           # Client ChromaDB
-│   │   └── groq.ts               # Client Groq
-│   └── store/chatStore.ts        # État global
+├── app/                          # Frontend Next.js
+│   ├── api/chat/route.ts         # API route pour Groq + Neon Vector
+│   ├── layout.tsx                # Layout principal
+│   └── page.tsx                  # Interface chat
+│
+├── components/
+│   ├── chat/                     # Composants chat
+│   ├── layout/                   # Header/Sidebar
+│   └── legal/                    # Composants juridiques
+│
+├── lib/
+│   ├── vectordb.ts               # Client Neon Vector
+│   └── groq.ts                   # Client Groq
 │
 ├── prisma/
-│   └── schema.prisma             # Modèles DB (LegalDocument, Source, etc.)
+│   └── schema.prisma             # Modèles DB (LegalDocument, embeddings, etc.)
 │
-├── scrapers/                     # Scripts Python
-│   ├── scraper_simple.py         # Scraper principal
-│   ├── requirements.txt          # Dépendances Python
-│   └── cron_setup.sh             # Automatisation
-│
-└── data/                         # Données locales
-    ├── chroma_db/                # Base ChromaDB
-    └── logs/                     # Logs scraping
+└── scraper/                      # Scripts Python
+    ├── scraper_with_pgvector.py  # Scraper avec Neon Vector
+    ├── requirements.txt          # Dépendances Python
+    └── seed_data.py              # Initialisation données
 ```
 
 ## 🎨 Design System
@@ -103,15 +99,11 @@ legit/
 ### 2. Variables d'environnement
 Créer `.env` à la racine :
 ```env
-# Base de données
+# Base de données Neon avec pgvector
 DATABASE_URL="postgresql://user:password@localhost:5432/lexia"
 
 # API Keys
 GROQ_API_KEY="gsk_..."
-
-# ChromaDB
-CHROMA_HOST="localhost"
-CHROMA_PORT="8000"
 ```
 
 ### 3. Setup Backend
@@ -128,24 +120,14 @@ cd scrapers
 pip install -r requirements.txt
 ```
 
-### 4. Lancer ChromaDB
-```bash
-# Option 1: Docker (recommandé)
-docker run -p 8000:8000 chromadb/chroma
-
-# Option 2: Local Python
-pip install chromadb
-chroma run --host localhost --port 8000
-```
-
-### 5. Premier scraping
+### 4. Premier scraping
 ```bash
 cd scrapers
 python scraper_simple.py
 # Patiente 5-10 min pour le scraping initial
 ```
 
-### 6. Lancer l'application
+### 5. Lancer l'application
 ```bash
 # Dev mode
 npm run dev
@@ -203,7 +185,7 @@ Endpoint principal pour les questions juridiques.
 ```
 
 **Process interne:**
-1. ChromaDB recherche les 5 documents les plus pertinents
+1. Neon Vector recherche les 5 documents les plus pertinents (pgvector)
 2. Groq génère la réponse avec le contexte
 3. Sauvegarde dans PostgreSQL via Prisma
 
@@ -241,20 +223,20 @@ Endpoint principal pour les questions juridiques.
 # Visite les sites officiels
 articles = scraper.extraire("jo.gouv.ci")
 
-# Sauvegarde PostgreSQL
+# Sauvegarde PostgreSQL avec embeddings
 prisma.legalDocument.create(articles)
 
-# Crée embeddings + ChromaDB
-chroma.add(documents, embeddings)
+# Les embeddings sont stockés directement dans PostgreSQL (pgvector)
 ```
 
 ### 2. Question utilisateur
 ```typescript
-// Next.js API route
-const results = await chromaDB.query({
-  query: "création SARL",
-  n_results: 5
-})
+// Next.js API route - Recherche vectorielle avec pgvector
+const results = await prisma.$queryRaw`
+  SELECT * FROM legal_documents
+  ORDER BY embedding <-> ${queryEmbedding}
+  LIMIT 5
+`
 
 const response = await groq.chat({
   model: "llama-3.1-70b",
@@ -283,16 +265,6 @@ schtasks /create /tn "LexIA Scraper" /tr "C:\Python39\python.exe C:\legit\scrape
 ```
 
 ## 🐛 Troubleshooting
-
-### ChromaDB ne démarre pas
-```bash
-# Vérifier le port
-netstat -ano | findstr :8000
-
-# Relancer avec Docker
-docker stop chroma && docker rm chroma
-docker run -d -p 8000:8000 --name chroma chromadb/chroma
-```
 
 ### Erreur Groq API
 ```bash
@@ -327,16 +299,16 @@ cd scrapers && python scraper_simple.py
 docker compose up -d  # PostgreSQL + ChromaDB + Next.js
 ```
 
-### Option 2: Vercel + Supabase
+### Option 2: Vercel + Neon
 - **Frontend**: Vercel (Next.js)
-- **Database**: Supabase (PostgreSQL)
-- **ChromaDB**: Cloud hosting (pas gratuit)
+- **Database**: Neon PostgreSQL (avec pgvector activé)
 - **Scraper**: GitHub Actions ou Cron Job VPS
 
 ## 📚 Ressources
 
 - [Guide complet GUIDE_LEXIA.md](./GUIDE_LEXIA.md)
-- [ChromaDB Docs](https://docs.trychroma.com)
+- [Neon PostgreSQL](https://neon.tech)
+- [pgvector Extension](https://github.com/pgvector/pgvector)
 - [Groq API](https://console.groq.com)
 - [Prisma Docs](https://prisma.io/docs)
 
