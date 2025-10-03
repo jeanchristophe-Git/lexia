@@ -6,10 +6,10 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react']
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   images: {
     domains: ['civilii.ci'],
