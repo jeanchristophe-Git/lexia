@@ -48,7 +48,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto px-6 py-10">
             {/* Welcome Section */}
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full mb-5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-claude-primary/10 text-claude-primary text-xs font-medium rounded-full mb-5">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Intelligence Artificielle Juridique</span>
               </div>
@@ -70,7 +70,7 @@ export default function HomePage() {
                     onClick={() => handleQuickStart(goal.title)}
                     className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group"
                   >
-                    <h3 className="text-sm font-medium text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
+                    <h3 className="text-sm font-medium text-gray-900 mb-1 group-hover:text-claude-primary transition-colors">
                       {goal.title}
                     </h3>
                     <p className="text-xs text-gray-500 leading-relaxed">
@@ -104,7 +104,7 @@ export default function HomePage() {
                     }
                   }}
                   placeholder="Comment créer une entreprise en Côte d'Ivoire ?"
-                  className="w-full px-4 py-3.5 pr-28 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-[13px] shadow-sm"
+                  className="w-full px-4 py-3.5 pr-28 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-claude-primary focus:border-transparent text-gray-900 placeholder-gray-400 text-[13px] shadow-sm"
                 />
                 <div className="absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -118,7 +118,7 @@ export default function HomePage() {
                       }
                     }}
                     disabled={!query.trim()}
-                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-green-600 text-white text-xs font-semibold rounded-lg hover:shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-claude-primary hover:bg-claude-primary-dark text-white text-xs font-semibold rounded-lg hover:shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>Envoyer</span>
                     <Sparkles className="w-3.5 h-3.5" />

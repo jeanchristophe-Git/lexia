@@ -43,7 +43,7 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
     return content.split('\n').map((line, index) => {
       if (line.startsWith('**') && line.endsWith('**')) {
         return (
-          <h4 key={index} className="font-semibold mt-3 mb-1 text-black">
+          <h4 key={index} className="font-semibold mt-3 mb-1 text-gray-900">
             {line.slice(2, -2)}
           </h4>
         );
@@ -77,12 +77,12 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
       <div className="flex items-center space-x-2 mb-2">
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
           isUser
-            ? 'bg-gradient-to-br from-orange-400 to-green-500 text-white'
-            : 'bg-gradient-to-br from-orange-500 to-green-600'
+            ? 'bg-claude-primary text-white'
+            : 'bg-claude-primary'
         }`}>
           {isUser ? <User className="h-4 w-4" /> : <span className="text-white text-sm font-bold">⚖️</span>}
         </div>
-        <span className="text-sm font-medium text-black">
+        <span className="text-sm font-medium text-gray-900">
           {isUser ? 'Vous' : 'LexIA'}
         </span>
         <span className="text-xs text-gray-500">
@@ -96,8 +96,8 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
       {/* Message Content */}
       <div className={`relative rounded-2xl p-4 ${
         isUser
-          ? 'bg-blue-600 text-white ml-8'
-          : 'bg-white border border-gray-200 text-black'
+          ? 'bg-gray-100 text-gray-900 ml-8'
+          : 'bg-white border border-gray-200 text-gray-900'
       }`}>
         <div className="prose prose-sm max-w-none">
           {typeof message.content === 'string'
@@ -108,10 +108,10 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
 
         {/* Action Buttons */}
         {!isUser && (
-          <div className="flex items-center space-x-2 mt-4 pt-3 border-t border-gray-100">
+          <div className="flex items-center space-x-2 mt-4 pt-3 border-t border-gray-200">
             <button
               onClick={handleCopy}
-              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-500 hover:text-black transition-colors"
+              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-600 hover:text-gray-900 transition-colors"
             >
               <Copy className="h-3 w-3" />
               <span>{copied ? 'Copié!' : 'Copier'}</span>
@@ -119,7 +119,7 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
 
             <button
               onClick={handleShare}
-              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-500 hover:text-black transition-colors"
+              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-600 hover:text-gray-900 transition-colors"
             >
               <Share2 className="h-3 w-3" />
               <span>Partager</span>
@@ -128,7 +128,7 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
             {hasSources && (
               <button
                 onClick={() => setShowSources(!showSources)}
-                className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-500 hover:text-black transition-colors"
+                className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-gray-100 text-xs text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ExternalLink className="h-3 w-3" />
                 <span>Sources ({message.sources?.length})</span>

@@ -106,7 +106,7 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 disabled={isTyping}
-                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-0 min-h-[50px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-0 min-h-[50px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 rows={1}
               />
 
@@ -132,7 +132,7 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
               <button
                 key={index}
                 onClick={() => setInput(suggestion)}
-                className="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-black transition-colors"
+                className="px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 {suggestion}
               </button>

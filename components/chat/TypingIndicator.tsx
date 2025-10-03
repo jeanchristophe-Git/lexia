@@ -11,10 +11,10 @@ export default function TypingIndicator() {
       className="mb-6 max-w-4xl"
     >
       <div className="flex items-center space-x-2 mb-2">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center">
+        <div className="w-7 h-7 rounded-lg bg-claude-primary flex items-center justify-center">
           <span className="text-white text-sm font-bold">⚖️</span>
         </div>
-        <span className="text-sm font-medium text-black">LexIA</span>
+        <span className="text-sm font-medium text-gray-900">LexIA</span>
         <span className="text-xs text-gray-500">écrit...</span>
       </div>
 
@@ -32,7 +32,7 @@ export default function TypingIndicator() {
                 delay: i * 0.15,
                 ease: "easeInOut"
               }}
-              className="w-2 h-2 bg-gradient-to-br from-orange-500 to-green-600 rounded-full"
+              className="w-2 h-2 bg-gray-400 rounded-full"
             />
           ))}
         </div>

@@ -49,14 +49,14 @@ export default function WelcomeScreen() {
       {/* Logo et titre - style ChatGPT */}
       <div className="text-center mb-8">
         <div className="mb-4 flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
+          <div className="w-12 h-12 bg-claude-primary rounded-full flex items-center justify-center text-white text-xl font-semibold">
             ⚖️
           </div>
         </div>
-        <h1 className="text-2xl font-semibold text-black mb-2">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
           Assistant Juridique {selectedCountry.flag} {selectedCountry.name}
         </h1>
-        <p className="text-gray-500 text-base">
+        <p className="text-gray-600 text-base">
           Posez vos questions sur le droit {selectedCountry.code === 'ci' ? 'ivoirien' : selectedCountry.code === 'cm' ? 'camerounais' : 'togolais'}
         </p>
       </div>
@@ -68,7 +68,7 @@ export default function WelcomeScreen() {
             <button
               key={index}
               onClick={() => handleQuestionClick(question)}
-              className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm text-black bg-white"
+              className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm text-gray-900 bg-white"
             >
               {question}
             </button>

@@ -10,6 +10,21 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      colors: {
+        // Palette Claude.ai
+        claude: {
+          primary: '#CC785C',
+          'primary-dark': '#B5644A',
+          'primary-light': '#E09780',
+        },
+        background: '#FFFFFF',
+        surface: '#F5F5F5',
+        border: '#E5E5E5',
+        text: {
+          primary: '#1F1F1F',
+          secondary: '#666666',
+        }
+      },
       fontFamily: {
         sans: ["Poppins", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],

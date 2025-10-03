@@ -59,12 +59,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const sidebarContent = (
-    <div className="h-full flex flex-col bg-gray-50 border-r border-gray-200">
+    <div className="h-full flex flex-col bg-white border-r border-gray-200">
       {/* Nouveau chat button - Style Claude */}
       <div className="p-2 border-b border-gray-200">
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-lg hover:bg-white text-sm font-medium text-gray-900 transition-colors shadow-sm"
+          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-900 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>Nouveau chat</span>
@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="lg:hidden flex justify-end p-2">
         <button
           onClick={onClose}
-          className="p-1 rounded-md hover:bg-white text-gray-500"
+          className="p-1 rounded-md hover:bg-gray-100 text-gray-500"
           aria-label="Fermer"
         >
           <X className="h-5 w-5" />
@@ -96,8 +96,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 key={conversation.id}
                 className={`group relative rounded-lg cursor-pointer transition-colors ${
                   currentConversationId === conversation.id
-                    ? 'bg-white shadow-sm'
-                    : 'hover:bg-white'
+                    ? 'bg-gray-100 shadow-sm'
+                    : 'hover:bg-gray-100'
                 }`}
                 onClick={() => handleLoadConversation(conversation.id)}
               >
@@ -110,7 +110,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </div>
                   <button
                     onClick={(e) => handleDeleteConversation(e, conversation.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-100 text-gray-500 transition-opacity ml-2"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 text-gray-500 transition-opacity ml-2"
                     aria-label="Supprimer"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -125,7 +125,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Footer - Style Claude */}
       <div className="border-t border-gray-200 p-2 space-y-1">
         {/* Support */}
-        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white text-gray-700 text-sm transition-colors">
+        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 text-sm transition-colors">
           <HelpCircle className="h-4 w-4" />
           <span>Support</span>
         </button>
@@ -135,9 +135,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <>
             <button
               onClick={() => setShowProfilePopup(true)}
-              className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-white transition-colors group"
+              className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors group"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+              <div className="w-8 h-8 bg-claude-primary rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                 {getUserInitials()}
               </div>
               <div className="flex-1 min-w-0 text-left">
