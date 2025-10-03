@@ -42,7 +42,9 @@ export default function RootLayout({
           <StackTheme>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <DemoBanner />
-              {children}
+              <div className="pt-14">
+                {children}
+              </div>
             </ThemeProvider>
           </StackTheme>
         </StackProvider>

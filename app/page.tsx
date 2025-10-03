@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Mic, Menu } from 'lucide-react';
+import { Sparkles, ArrowUp, Menu } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
 import ChatInterface from '@/components/chat/ChatInterface';
 import { useChatStore } from '@/store/chatStore';
@@ -101,14 +101,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* AI Input Box */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 md:p-8 border-2 border-blue-100 shadow-lg">
-              <div className="mb-5">
-                <div className="inline-block px-3 py-1.5 bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full mb-3 shadow-sm">
-                  Posez votre question juridique
-                </div>
-              </div>
-
+            {/* AI Input Box - Style moderne comme ChatGPT */}
+            <div className="bg-white rounded-3xl p-2 border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow">
               <div className="relative">
                 <input
                   type="text"
@@ -120,29 +114,28 @@ export default function HomePage() {
                       setQuery('');
                     }
                   }}
-                  placeholder="Comment créer une entreprise en Côte d'Ivoire ?"
-                  className="w-full px-5 py-4 pr-32 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900 placeholder-gray-400 text-sm shadow-sm"
+                  placeholder="Posez votre question juridique..."
+                  className="w-full px-6 py-4 pr-16 bg-transparent border-none focus:outline-none text-gray-900 placeholder-gray-400 text-base"
                 />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                  <button className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors">
-                    <Mic className="w-5 h-5 text-gray-400" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (query.trim()) {
-                        handleQuickStart(query);
-                        setQuery('');
-                      }
-                    }}
-                    disabled={!query.trim()}
-                    className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-lg hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span>Envoyer</span>
-                    <Sparkles className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    if (query.trim()) {
+                      handleQuickStart(query);
+                      setQuery('');
+                    }
+                  }}
+                  disabled={!query.trim()}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-primary hover:bg-primary-dark text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+                >
+                  <ArrowUp className="w-5 h-5" />
+                </button>
               </div>
             </div>
+
+            {/* Disclaimer sous l'input */}
+            <p className="text-center text-xs text-gray-500 mt-4">
+              LexIA peut faire des erreurs. Vérifiez les informations importantes avec un avocat.
+            </p>
           </div>
         </div>
       </div>

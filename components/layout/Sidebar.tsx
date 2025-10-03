@@ -60,8 +60,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white border-r border-gray-200 shadow-sm">
+      {/* Logo LexIA */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center space-x-2 mb-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+            ⚖️
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">LexIA</h1>
+            <p className="text-[10px] text-gray-500">Assistant Juridique IA</p>
+          </div>
+        </div>
+      </div>
+
       {/* Nouveau chat button */}
-      <div className="p-3 border-b border-gray-200">
+      <div className="px-3 pt-3 pb-2">
         <button
           onClick={handleNewChat}
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-sm font-semibold text-white transition-all shadow-sm hover:shadow-md"

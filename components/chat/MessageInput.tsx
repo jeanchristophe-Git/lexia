@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { ArrowUp, Loader2 } from 'lucide-react';
 import { useChatStore } from '@/store/chatStore';
 import { sendMessage } from '@/store/chatStore';
 import { getPlaceholderByCountry } from '@/lib/countries';
@@ -118,7 +118,7 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
                 {isTyping ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  <Send className="h-5 w-5" />
+                  <ArrowUp className="h-5 w-5" />
                 )}
               </button>
             </div>
