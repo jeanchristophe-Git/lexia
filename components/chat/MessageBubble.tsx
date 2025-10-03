@@ -74,18 +74,18 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
       className={`group relative mb-6 ${isUser ? 'ml-auto max-w-2xl' : 'max-w-4xl'}`}
     >
       {/* Message Header */}
-      <div className="flex items-center space-x-2 mb-2">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+      <div className="flex items-center space-x-3 mb-3">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
           isUser
-            ? 'bg-claude-user-bubble text-white'
-            : 'bg-claude-assistant-bubble'
+            ? 'bg-gradient-to-br from-primary to-primary-dark text-white'
+            : 'bg-gradient-to-br from-accent to-purple-600 text-white'
         }`}>
-          {isUser ? <User className="h-4 w-4" /> : <span className="text-white text-sm font-bold">⚖️</span>}
+          {isUser ? <User className="h-4 w-4" /> : <span className="text-base font-bold">⚖️</span>}
         </div>
-        <span className="text-sm font-medium text-claude-text-light">
+        <span className="text-sm font-semibold text-gray-900">
           {isUser ? 'Vous' : 'LexIA'}
         </span>
-        <span className="text-xs text-claude-text-secondary">
+        <span className="text-xs text-gray-500">
           {formatDate(message.timestamp)}
         </span>
         {!isUser && message.confidence && (
@@ -94,10 +94,10 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
       </div>
 
       {/* Message Content */}
-      <div className={`relative rounded-2xl p-4 ${
+      <div className={`relative rounded-2xl p-5 shadow-sm ${
         isUser
-          ? 'bg-claude-user-bubble text-white ml-8'
-          : 'bg-claude-assistant-bubble border border-claude-border text-claude-text-light'
+          ? 'bg-primary/10 border border-primary/20 text-gray-900 ml-10'
+          : 'bg-white border-2 border-gray-200 text-gray-900'
       }`}>
         <div className="prose prose-sm max-w-none">
           {typeof message.content === 'string'
@@ -108,31 +108,31 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
 
         {/* Action Buttons */}
         {!isUser && (
-          <div className="flex items-center space-x-2 mt-4 pt-3 border-t border-claude-border">
+          <div className="flex items-center space-x-2 mt-5 pt-4 border-t border-gray-200">
             <button
               onClick={handleCopy}
-              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-claude-border text-xs text-claude-text-secondary hover:text-claude-text-light transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <Copy className="h-3 w-3" />
+              <Copy className="h-3.5 w-3.5" />
               <span>{copied ? 'Copié!' : 'Copier'}</span>
             </button>
 
             <button
               onClick={handleShare}
-              className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-claude-border text-xs text-claude-text-secondary hover:text-claude-text-light transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <Share2 className="h-3 w-3" />
+              <Share2 className="h-3.5 w-3.5" />
               <span>Partager</span>
             </button>
 
             {hasSources && (
               <button
                 onClick={() => setShowSources(!showSources)}
-                className="flex items-center space-x-1 px-2 py-1 rounded-md hover:bg-claude-border text-xs text-claude-text-secondary hover:text-claude-text-light transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="h-3.5 w-3.5" />
                 <span>Sources ({message.sources?.length})</span>
-                {showSources ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {showSources ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               </button>
             )}
 
@@ -140,7 +140,7 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
 
             <a
               href="#"
-              className="text-xs text-claude-user-bubble hover:text-blue-400 underline"
+              className="text-xs font-medium text-primary hover:text-primary-dark underline"
             >
               Consulter un avocat
             </a>

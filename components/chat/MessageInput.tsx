@@ -94,8 +94,8 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
   };
 
   return (
-    <div className="border-t border-claude-border bg-claude-sidebar">
-      <div className="px-4 pb-4 pt-2">
+    <div className="border-t-2 border-gray-200 bg-white shadow-lg">
+      <div className="px-4 pb-5 pt-4">
         <form onSubmit={handleSubmit}>
           <div className="flex items-end space-x-3 max-w-4xl mx-auto">
             <div className="flex-1 relative">
@@ -106,19 +106,19 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 disabled={isTyping}
-                className="w-full resize-none rounded-xl border border-claude-border bg-claude-bg-main px-4 py-3 pr-12 text-sm text-claude-text-light placeholder:text-claude-text-secondary focus:border-claude-user-bubble focus:outline-none focus:ring-0 min-h-[50px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full resize-none rounded-2xl border-2 border-gray-200 bg-white px-5 py-4 pr-14 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[56px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
                 rows={1}
               />
 
               <button
                 type="submit"
                 disabled={!input.trim() || isTyping}
-                className="absolute right-2 bottom-2 h-8 w-8 rounded-full p-0 bg-claude-user-bubble hover:bg-blue-600 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="absolute right-3 bottom-3 h-10 w-10 rounded-xl p-0 bg-primary hover:bg-primary-dark text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
               >
                 {isTyping ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -127,12 +127,12 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
 
         {/* Suggestions */}
         {input === '' && (
-          <div className="flex flex-wrap gap-2 mt-3 max-w-4xl mx-auto">
+          <div className="flex flex-wrap gap-2 mt-4 max-w-4xl mx-auto">
             {getSuggestionsByCountry(selectedCountry.code).map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => setInput(suggestion)}
-                className="px-3 py-1 text-xs rounded-full bg-claude-border hover:bg-claude-assistant-bubble text-claude-text-secondary hover:text-claude-text-light transition-colors"
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 hover:bg-primary/10 text-gray-600 hover:text-primary transition-colors border border-transparent hover:border-primary/20"
               >
                 {suggestion}
               </button>

@@ -46,29 +46,29 @@ export default function WelcomeScreen() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto px-4">
-      {/* Logo et titre - style Claude dark */}
-      <div className="text-center mb-8">
-        <div className="mb-4 flex justify-center">
-          <div className="w-12 h-12 bg-claude-assistant-bubble rounded-full flex items-center justify-center text-white text-xl font-semibold">
+      {/* Logo et titre */}
+      <div className="text-center mb-10">
+        <div className="mb-5 flex justify-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
             ⚖️
           </div>
         </div>
-        <h1 className="text-2xl font-semibold text-claude-text-light mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">
           Assistant Juridique {selectedCountry.flag} {selectedCountry.name}
         </h1>
-        <p className="text-claude-text-secondary text-base">
+        <p className="text-gray-600 text-base">
           Posez vos questions sur le droit {selectedCountry.code === 'ci' ? 'ivoirien' : selectedCountry.code === 'cm' ? 'camerounais' : 'togolais'}
         </p>
       </div>
 
-      {/* Suggestions - style Claude dark */}
+      {/* Suggestions */}
       <div className="w-full mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {getExampleQuestions().map((question, index) => (
             <button
               key={index}
               onClick={() => handleQuestionClick(question)}
-              className="p-4 text-left border border-claude-border rounded-lg hover:bg-claude-sidebar hover:border-claude-user-bubble transition-colors text-sm text-claude-text-light bg-claude-sidebar"
+              className="p-5 text-left border-2 border-gray-200 rounded-2xl hover:bg-primary/5 hover:border-primary transition-all text-sm font-medium text-gray-800 bg-white shadow-sm hover:shadow-md"
             >
               {question}
             </button>
@@ -76,8 +76,8 @@ export default function WelcomeScreen() {
         </div>
       </div>
 
-      {/* Disclaimer discret - style Claude dark */}
-      <div className="text-center text-xs text-claude-text-secondary max-w-md">
+      {/* Disclaimer discret */}
+      <div className="text-center text-xs text-gray-500 max-w-md">
         <p>
           Information générale sur le droit {selectedCountry.code === 'ci' ? 'ivoirien' : selectedCountry.code === 'cm' ? 'camerounais' : 'togolais'}.
           Consultez un avocat inscrit au barreau pour validation juridique.

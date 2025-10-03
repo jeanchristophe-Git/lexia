@@ -11,15 +11,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // VRAIES couleurs Claude.ai
-        claude: {
-          'user-bubble': '#2B5CE6', // Bleu vif pour messages utilisateur
-          'assistant-bubble': '#2A2A2A', // Gris foncé pour messages assistant
-          'bg-main': '#0F0F0F', // Fond principal noir
-          'sidebar': '#171717', // Sidebar gris très foncé
-          'border': '#2A2A2A', // Bordures grises
-          'text-light': '#E5E5E5', // Texte clair
-          'text-secondary': '#9CA3AF', // Texte secondaire
+        // Design BLANC moderne et professionnel
+        primary: {
+          DEFAULT: '#2563EB', // Bleu moderne
+          dark: '#1D4ED8',
+          light: '#3B82F6',
+        },
+        accent: {
+          DEFAULT: '#8B5CF6', // Violet accent
+          light: '#A78BFA',
         },
       },
       fontFamily: {
