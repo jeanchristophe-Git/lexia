@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, MessageCircle, Trash2, Plus, History, Settings, HelpCircle } from 'lucide-react';
+import { X, MessageCircle, Trash2, Plus, HelpCircle, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@stackframe/stack';
+import { useTheme } from 'next-themes';
 import { useChatStore } from '@/store/chatStore';
 import { formatDate, truncateText } from '@/lib/utils';
+import UserProfilePopup from '@/components/UserProfilePopup';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,13 +15,24 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const user = useUser();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
   const {
     conversations,
     currentConversationId,
     loadConversation,
     deleteConversation,
-    clearCurrentChat
+    clearCurrentChat,
+    loadConversationsFromDB
   } = useChatStore();
+
+  // Charger les conversations depuis la BDD au montage
+  useEffect(() => {
+    loadConversationsFromDB();
+    setMounted(true);
+  }, [loadConversationsFromDB]);
 
   const handleNewChat = () => {
     clearCurrentChat();
@@ -37,13 +51,24 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     }
   };
 
+  // Obtenir les initiales de l'utilisateur
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const name = user.displayName || user.primaryEmail || 'User';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   const sidebarContent = (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Header ChatGPT style */}
-      <div className="p-3">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+      {/* Nouveau chat button - Style Claude */}
+      <div className="p-2 border-b border-gray-200 dark:border-gray-800">
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center justify-center space-x-2 px-3 py-3 rounded-lg border border-gray-200 hover:bg-white text-sm font-medium text-black transition-colors"
+          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>Nouveau chat</span>
@@ -51,22 +76,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Mobile close button */}
-      <div className="lg:hidden flex justify-end p-3 pt-0">
+      <div className="lg:hidden flex justify-end p-2">
         <button
           onClick={onClose}
-          className="p-1 rounded-md hover:bg-gray-100 text-gray-500"
+          className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
           aria-label="Fermer"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Conversations List - ChatGPT style */}
-      <div className="flex-1 overflow-y-auto px-3">
+      {/* Conversations List */}
+      <div className="flex-1 overflow-y-auto px-2 py-2">
         {conversations.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Aucune conversation</p>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-xs">Aucune conversation</p>
           </div>
         ) : (
           <div className="space-y-1">
@@ -75,24 +100,24 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 key={conversation.id}
                 className={`group relative rounded-lg cursor-pointer transition-colors ${
                   currentConversationId === conversation.id
-                    ? 'bg-gray-100'
-                    : 'hover:bg-gray-100'
+                    ? 'bg-gray-100 dark:bg-gray-800'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 onClick={() => handleLoadConversation(conversation.id)}
               >
-                <div className="flex items-center p-3">
-                  <MessageCircle className="h-4 w-4 text-gray-500 mr-3 flex-shrink-0" />
+                <div className="flex items-center p-2.5">
+                  <MessageCircle className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-black truncate">
+                    <p className="text-sm text-gray-900 dark:text-gray-100 truncate">
                       {truncateText(conversation.title, 30)}
                     </p>
                   </div>
                   <button
                     onClick={(e) => handleDeleteConversation(e, conversation.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white text-gray-500 transition-opacity ml-2"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-opacity ml-2"
                     aria-label="Supprimer"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
@@ -101,16 +126,60 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         )}
       </div>
 
-      {/* Footer - ChatGPT style */}
-      <div className="border-t border-gray-200 p-3 space-y-1">
-        <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-500 text-sm">
-          <Settings className="h-4 w-4" />
-          <span>Paramètres</span>
-        </button>
-        <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-500 text-sm">
+      {/* Footer - Style Claude */}
+      <div className="border-t border-gray-200 dark:border-gray-800 p-2 space-y-1">
+        {/* Support */}
+        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm transition-colors">
           <HelpCircle className="h-4 w-4" />
-          <span>Aide</span>
+          <span>Support</span>
         </button>
+
+        {/* Dark mode toggle */}
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm transition-colors"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="h-4 w-4" />
+                <span>Mode clair</span>
+              </>
+            ) : (
+              <>
+                <Moon className="h-4 w-4" />
+                <span>Mode sombre</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* User Profile - Cliquable style Claude */}
+        {user && (
+          <>
+            <button
+              onClick={() => setShowProfilePopup(true)}
+              className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                {getUserInitials()}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {user.displayName || user.primaryEmail || 'Utilisateur'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  Voir le profil
+                </p>
+              </div>
+            </button>
+
+            <UserProfilePopup
+              isOpen={showProfilePopup}
+              onClose={() => setShowProfilePopup(false)}
+            />
+          </>
+        )}
       </div>
     </div>
   );
