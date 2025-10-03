@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackClientApp } from "../stack/client";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { DemoBanner } from '@/components/DemoBanner'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -35,9 +38,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} h-full antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
-        </ThemeProvider>
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <DemoBanner />
+              {children}
+            </ThemeProvider>
+          </StackTheme>
+        </StackProvider>
       </body>
     </html>
   )

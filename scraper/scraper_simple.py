@@ -1,6 +1,6 @@
 """
-LexIA - Scraper Simple avec ChromaDB
-Scrape sites ivoiriens -> Prisma + ChromaDB
+LexIA - Scraper Simple avec Chroma Cloud
+Scrape sites ivoiriens -> PostgreSQL + Chroma Cloud
 """
 
 import requests
@@ -8,12 +8,9 @@ from bs4 import BeautifulSoup
 import os
 import sys
 import time
-import sqlite3
+import psycopg2
 import chromadb
-from chromadb.config import Settings
 from dotenv import load_dotenv
-from urllib.parse import urlparse
-import re
 
 # Charger les variables d'environnement depuis le dossier parent
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,48 +19,46 @@ load_dotenv(dotenv_path)
 
 # Configuration
 DATABASE_URL = os.getenv("DATABASE_URL")
-CHROMA_PATH = os.path.join(parent_dir, "data", "chroma_db")
+CHROMA_API_KEY = os.getenv("CHROMA_API_KEY")
+CHROMA_TENANT = os.getenv("CHROMA_TENANT")
+CHROMA_DATABASE = os.getenv("CHROMA_DATABASE")
 
 # Verifier les variables d'environnement
 if not DATABASE_URL:
     print("[ERROR] DATABASE_URL non trouve dans .env")
     sys.exit(1)
 
-# Extraire le chemin SQLite depuis DATABASE_URL
-db_path_match = re.search(r'file:(.*\.db)', DATABASE_URL)
-if db_path_match:
-    db_path = os.path.join(parent_dir, db_path_match.group(1).replace('./', ''))
-else:
-    print("[ERROR] Format DATABASE_URL invalide")
+if not all([CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE]):
+    print("[ERROR] Credentials Chroma Cloud manquants dans .env")
+    print("  Requis: CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE")
     sys.exit(1)
 
-# Creer le dossier data si necessaire
-os.makedirs(os.path.dirname(CHROMA_PATH), exist_ok=True)
-
-# Connexion SQLite (Prisma)
-print("[DB] Connexion a SQLite...")
+# Connexion PostgreSQL (Prisma)
+print("[DB] Connexion a PostgreSQL...")
 try:
-    conn = sqlite3.connect(db_path)
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
-    print(f"[OK] Connecte a SQLite ({db_path})")
+    print(f"[OK] Connecte a PostgreSQL")
 except Exception as e:
-    print(f"[ERROR] Erreur connexion SQLite: {e}")
+    print(f"[ERROR] Erreur connexion PostgreSQL: {e}")
     sys.exit(1)
 
-# Connexion ChromaDB
-print("[CHROMA] Initialisation ChromaDB...")
+# Connexion Chroma Cloud
+print("[CHROMA] Connexion a Chroma Cloud...")
 try:
-    chroma_client = chromadb.PersistentClient(
-        path=CHROMA_PATH,
-        settings=Settings(anonymized_telemetry=False)
+    chroma_client = chromadb.CloudClient(
+        api_key=CHROMA_API_KEY,
+        tenant=CHROMA_TENANT,
+        database=CHROMA_DATABASE
     )
     collection = chroma_client.get_or_create_collection(
         name="lexia_legal_docs",
-        metadata={"description": "Documents juridiques CI"}
+        metadata={"description": "Documents juridiques Cote d'Ivoire"}
     )
-    print(f"[OK] ChromaDB initialise ({collection.count()} documents existants)")
+    print(f"[OK] Connecte a Chroma Cloud ({collection.count()} documents existants)")
 except Exception as e:
-    print(f"[ERROR] Erreur ChromaDB: {e}")
+    print(f"[ERROR] Erreur Chroma Cloud: {e}")
+    print(f"  Verifie tes credentials dans .env")
     sys.exit(1)
 
 # Sites a scraper
@@ -164,11 +159,12 @@ def save_to_prisma(documents):
 
     for doc in documents:
         try:
-            # SQLite syntax (different from PostgreSQL)
+            # PostgreSQL syntax
             cursor.execute("""
-                INSERT OR REPLACE INTO LegalDocument
-                (id, title, category, contentPreview, sourceUrl, scrapedAt, createdAt)
-                VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                INSERT INTO "LegalDocument"
+                (id, title, category, "contentPreview", "sourceUrl", "scrapedAt", "createdAt")
+                VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+                ON CONFLICT (id) DO NOTHING
             """, (
                 doc['id'],
                 doc['title'],
@@ -187,12 +183,12 @@ def save_to_prisma(documents):
     print(f"  [OK] {saved_count}/{len(documents)} documents sauvegardes")
 
 def save_to_chromadb(documents):
-    """Sauvegarde dans ChromaDB (vecteurs)"""
+    """Sauvegarde dans Chroma Cloud (vecteurs)"""
     if not documents:
-        print("\n[WARN] Aucun document a sauvegarder dans ChromaDB")
+        print("\n[WARN] Aucun document a sauvegarder dans Chroma Cloud")
         return
 
-    print(f"\n[CHROMA] Sauvegarde ChromaDB...")
+    print(f"\n[CHROMA] Indexation Chroma Cloud...")
 
     try:
         # Preparer les donnees
@@ -204,18 +200,18 @@ def save_to_chromadb(documents):
             'url': doc['url']
         } for doc in documents]
 
-        # ChromaDB genere automatiquement les embeddings
-        collection.upsert(
+        # Chroma Cloud genere automatiquement les embeddings
+        collection.add(
             ids=ids,
             documents=texts,
             metadatas=metadatas
         )
 
-        print(f"  [OK] {len(documents)} vecteurs generes et indexes")
-        print(f"  [INFO] Total dans ChromaDB: {collection.count()} documents")
+        print(f"  [OK] {len(documents)} documents indexes dans Chroma Cloud")
+        print(f"  [INFO] Total dans Chroma Cloud: {collection.count()} documents")
 
     except Exception as e:
-        print(f"  [ERROR] Erreur ChromaDB: {e}")
+        print(f"  [ERROR] Erreur Chroma Cloud: {e}")
 
 def main():
     """Fonction principale"""
@@ -245,7 +241,7 @@ def main():
 
     print("\n" + "=" * 60)
     print(f"[DONE] TERMINE - {len(all_documents)} documents scrapes")
-    print(f"[INFO] ChromaDB: {collection.count()} documents au total")
+    print(f"[INFO] Chroma Cloud: {collection.count()} documents au total")
     print("[OK] Disponibles pour Next.js maintenant!")
     print("=" * 60)
 

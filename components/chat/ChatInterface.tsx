@@ -33,13 +33,13 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900">
+    <div className="flex-1 flex flex-col min-w-0 bg-gray-50">
       {/* Share button - visible only when conversation active */}
       {hasMessages && (
         <div className="absolute top-4 left-4 z-10">
           <button
             onClick={handleShare}
-            className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 text-sm font-medium shadow-sm transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-sm font-medium shadow-sm transition-colors"
           >
             {copied ? (
               <>

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -X POST http://localhost:3002/api/chat -H \"Content-Type: application/json\" -d \"{\"\"message\"\":\"\"Comment créer une SARL en Côte d''Ivoire?\"\",\"\"session_id\"\":\"\"test_chroma_123\"\"}\")",
+      "Bash(curl -X POST http://localhost:3002/api/chat -H \"Content-Type: application/json\" -d \"{\"\"question\"\":\"\"Comment créer une SARL en Côte d''Ivoire?\"\",\"\"session_id\"\":\"\"test_chroma_123\"\"}\")",
+      "Bash(curl -X POST http://localhost:3002/api/chat -H \"Content-Type: application/json\" -d \"{\"\"question\"\":\"\"Comment créer une SARL en Côte d''''Ivoire?\"\",\"\"session_id\"\":\"\"test_chroma_456\"\"}\")",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "Bash(npx @stackframe/init-stack@latest:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

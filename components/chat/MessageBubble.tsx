@@ -75,15 +75,15 @@ export default function MessageBubble({ message, isLast }: MessageBubbleProps) {
     >
       {/* Message Header */}
       <div className="flex items-center space-x-2 mb-2">
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
           isUser
-            ? 'bg-blue-600 text-white'
-            : 'bg-gradient-to-br from-green-500 to-blue-600 text-white'
+            ? 'bg-gradient-to-br from-orange-400 to-green-500 text-white'
+            : 'bg-gradient-to-br from-orange-500 to-green-600'
         }`}>
-          {isUser ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
+          {isUser ? <User className="h-4 w-4" /> : <span className="text-white text-sm font-bold">⚖️</span>}
         </div>
         <span className="text-sm font-medium text-black">
-          {isUser ? 'Vous' : 'Assistant Juridique'}
+          {isUser ? 'Vous' : 'LexIA'}
         </span>
         <span className="text-xs text-gray-500">
           {formatDate(message.timestamp)}

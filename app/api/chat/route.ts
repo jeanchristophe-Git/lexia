@@ -1,265 +1,174 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-import { PrismaClient } from '@prisma/client';
+import { checkUserQuotas } from '@/lib/quota-checker';
+import { QuotaError } from '@/lib/limits';
+import { prisma } from '@/lib/prisma';
+import { searchRelevantDocuments } from '@/lib/embeddings';
 
 // Initialiser Groq avec la clé API
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || ''
 });
 
-// Initialiser Prisma
-const prisma = new PrismaClient();
-
 // Prompt système pour LexIA
 const LEXIA_SYSTEM_PROMPT = `Tu es LexIA, assistant juridique IA spécialisé en droit ivoirien.
 
-## Ton identité
-- Nom : LexIA (Legal Intelligence Assistant)
-- Spécialité : Législation ivoirienne complète
-- Mission : Aider entrepreneurs et citoyens ivoiriens
+## Ton comportement
 
-## Tes compétences
-- Maîtrise du droit ivoirien
-- Explications claires en français
-- Conseils pratiques pour entrepreneurs
+1. **Messages humains normaux (salutations, remerciements, etc.)** :
+   - Réponds de manière naturelle et amicale
+   - Pas besoin de chercher dans les sources juridiques
+   - Exemple : "Bonjour" → "Bonjour ! Je suis LexIA, votre assistant juridique ivoirien. Comment puis-je vous aider aujourd'hui ?"
 
-## Comportement
-- Professionnel et courtois
-- Cite tes sources quand possible
-- Si info manquante, dis-le clairement
-- Rappelle de consulter un avocat pour cas complexes
+2. **Questions juridiques** :
+   - Utilise UNIQUEMENT les documents fournis
+   - Si pas de documents : "Je n'ai pas trouvé cette information dans mes sources officielles ivoiriennes. Cependant, je peux vous orienter..."
+   - Cite toujours tes sources
 
 ## Format de réponse
-1. Réponse directe (2-3 phrases)
-2. Explications détaillées
-3. Conseil pratique si nécessaire
 
-Réponds toujours en français de manière claire et professionnelle.`;
+- Réponse directe et précise
+- Explications claires
+- Conseils pratiques si pertinent
 
-// Fonction pour rechercher des documents pertinents
-async function searchRelevantDocuments(query: string, limit: number = 5) {
-  try {
-    // Recherche simple par mots-clés dans le titre et contentPreview
-    // TODO: Utiliser ChromaDB pour recherche vectorielle plus tard
-    const keywords = query.toLowerCase().split(' ')
-      .filter(word => word.length > 3)
-      .slice(0, 5); // Top 5 mots-clés
-
-    const documents = await prisma.legalDocument.findMany({
-      where: {
-        OR: keywords.map(keyword => ({
-          OR: [
-            { title: { contains: keyword, mode: 'insensitive' } },
-            { contentPreview: { contains: keyword, mode: 'insensitive' } },
-            { category: { contains: keyword, mode: 'insensitive' } }
-          ]
-        }))
-      },
-      take: limit,
-      orderBy: { createdAt: 'desc' }
-    });
-
-    return documents;
-  } catch (error) {
-    console.error('Erreur recherche documents:', error);
-    return [];
-  }
-}
-
-// Fonction pour sauvegarder la conversation
-async function saveConversation(data: {
-  sessionId: string;
-  question: string;
-  answer: string;
-  confidence: number;
-  sources: any[];
-}) {
-  try {
-    await prisma.conversation.create({
-      data: {
-        sessionId: data.sessionId,
-        question: data.question,
-        answer: data.answer,
-        confidence: data.confidence,
-        sources: JSON.stringify(data.sources)
-      }
-    });
-  } catch (error) {
-    console.error('Erreur sauvegarde conversation:', error);
-  }
-}
+Réponds toujours en français de manière professionnelle et claire.`;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { question, session_id, conversation_history } = body;
+    const { question, session_id, user_id } = await request.json();
 
-    if (!question || question.trim().length < 10) {
+    // Validation
+    if (!question || question.trim().length < 2) {
       return NextResponse.json(
-        { error: 'La question doit contenir au moins 10 caractères' },
+        { error: 'Question trop courte' },
         { status: 400 }
       );
     }
 
-    // Vérifier si la clé API Groq est configurée
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({
-        answer: `⚠️ **Configuration nécessaire**
+    console.log(`\n[LEXIA] Nouvelle question: "${question}"`);
 
-Pour utiliser LexIA avec l'IA, vous devez :
-
-1. Obtenir une clé API gratuite sur https://console.groq.com
-2. Créer un fichier \`.env.local\` à la racine du projet
-3. Ajouter : \`GROQ_API_KEY=votre_clé_ici\`
-4. Redémarrer le serveur Next.js
-
-**Votre question :** "${question}"
-
-Pour l'instant, l'API fonctionne en mode simulé. Une fois configurée, vous aurez des réponses juridiques précises basées sur l'IA ! ✅`,
-        sources: [],
-        confidence: 0,
-        session_id: session_id || 'demo',
-        conversation_id: `demo_${Date.now()}`,
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // 1. RECHERCHER les documents pertinents dans la base de données
-    console.log('[LexIA] Recherche de documents pour:', question);
-    const relevantDocs = await searchRelevantDocuments(question, 3);
-    console.log(`[LexIA] ${relevantDocs.length} documents trouvés`);
-
-    // 2. CONSTRUIRE le contexte juridique pour l'IA
-    let legalContext = '';
-    if (relevantDocs.length > 0) {
-      legalContext = '\n\n## DOCUMENTS JURIDIQUES PERTINENTS\n\n';
-      relevantDocs.forEach((doc, idx) => {
-        legalContext += `### Document ${idx + 1}: ${doc.title}\n`;
-        legalContext += `Catégorie: ${doc.category}\n`;
-        legalContext += `Contenu: ${doc.contentPreview}\n`;
-        if (doc.sourceUrl) {
-          legalContext += `Source: ${doc.sourceUrl}\n`;
-        }
-        legalContext += '\n---\n\n';
-      });
-      legalContext += '**Instructions:** Base ta réponse sur ces documents officiels. Cite les documents que tu utilises.';
-    } else {
-      legalContext = '\n\n**Note:** Aucun document spécifique trouvé. Réponds avec tes connaissances générales du droit ivoirien et recommande de consulter les sources officielles.';
-    }
-
-    // 3. CONSTRUIRE l'historique de conversation pour le contexte
-    const messages: any[] = [
-      {
-        role: 'system',
-        content: LEXIA_SYSTEM_PROMPT + legalContext
+    // Vérifier les quotas
+    let quotaStatus;
+    try {
+      quotaStatus = await checkUserQuotas(user_id || null, session_id || 'demo');
+    } catch (error) {
+      if (error instanceof QuotaError) {
+        return NextResponse.json(
+          {
+            error: 'Quota dépassé',
+            code: (error as any).code,
+            limit: (error as any).limit,
+            current: (error as any).current
+          },
+          { status: 429 }
+        );
       }
+      throw error;
+    }
+
+    // Détecter si c'est un message casual (salutation, remerciement, etc.)
+    const casualKeywords = ['bonjour', 'salut', 'hello', 'hi', 'merci', 'thanks', 'ok', 'ça va', 'comment vas-tu', 'au revoir', 'bye'];
+    const isCasual = casualKeywords.some(keyword => question.toLowerCase().includes(keyword)) && question.length < 50;
+
+    let docs: any[] = [];
+    let context = '';
+
+    // Chercher dans la DB seulement si c'est une question juridique
+    if (!isCasual) {
+      console.log('[LEXIA] 🔍 Recherche dans la base de données...');
+      docs = await searchRelevantDocuments(question, 5);
+      console.log(`[LEXIA] ✅ ${docs.length} documents trouvés`);
+
+      if (docs.length > 0) {
+        context = docs
+          .map((doc, i) => `
+SOURCE ${i + 1}: ${doc.title} (${doc.category})
+Contenu: ${doc.contentPreview}
+---`)
+          .join('\n');
+
+        console.log('[LEXIA] 📝 Contexte construit avec', docs.length, 'sources');
+      }
+    } else {
+      console.log('[LEXIA] 💬 Message casual détecté, pas de recherche DB');
+    }
+
+    // GROQ GÉNÈRE LA RÉPONSE
+    console.log('[LEXIA] 🤖 Envoi à Groq...');
+
+    const messages: any[] = [
+      { role: 'system', content: LEXIA_SYSTEM_PROMPT }
     ];
 
-    // Ajouter l'historique si présent (max 3 derniers échanges)
-    if (conversation_history && Array.isArray(conversation_history)) {
-      const recentHistory = conversation_history.slice(-3);
-      recentHistory.forEach((msg: any) => {
-        messages.push(
-          { role: 'user', content: msg.question },
-          { role: 'assistant', content: msg.answer }
-        );
+    // Ajouter le contexte seulement si on a des documents
+    if (context) {
+      messages.push({
+        role: 'system',
+        content: `Documents juridiques officiels pour cette question:\n\n${context}`
       });
     }
 
-    // Ajouter la question actuelle
-    messages.push({
-      role: 'user',
-      content: question
-    });
+    messages.push({ role: 'user', content: question });
 
-    // 4. APPELER Groq AI avec le contexte enrichi
-    console.log('[LexIA] Envoi à Groq...');
-    const chatCompletion = await groq.chat.completions.create({
+    const response = await groq.chat.completions.create({
       messages,
       model: 'llama-3.3-70b-versatile',
-      temperature: 0.3,
-      max_tokens: 2000,
+      temperature: isCasual ? 0.7 : 0.3,
+      max_tokens: 2000
     });
 
-    const answer = chatCompletion.choices[0]?.message?.content ||
-      'Désolé, je n\'ai pas pu générer une réponse. Veuillez réessayer.';
+    const answer = response.choices[0].message.content || '';
 
-    // 5. FORMATER les sources avec les vrais documents
-    const sources = relevantDocs.map(doc => ({
+    console.log('[LEXIA] ✅ Réponse générée avec succès');
+
+    // PRÉPARER LES SOURCES
+    const sources = docs.map(doc => ({
       title: doc.title,
+      url: doc.sourceUrl,
       category: doc.category,
-      article: doc.articleNumber || 'Référence',
-      url: doc.sourceUrl || 'https://www.gouv.ci',
-      preview: doc.contentPreview?.substring(0, 150) + '...',
-      relevance_score: 0.85
+      relevance_score: doc.similarity?.toFixed(2) || '0'
     }));
 
-    // Calculer la confiance basée sur le nombre de documents trouvés
-    const confidence = relevantDocs.length > 0 ? 0.85 : 0.5;
+    // SAUVEGARDER DANS POSTGRESQL (si user_id existe)
+    if (user_id && session_id) {
+      try {
+        await prisma.conversation.create({
+          data: {
+            userId: user_id,
+            sessionId: session_id,
+            question,
+            answer,
+            confidence: docs.length > 0 ? 0.85 : 0.5,
+            sources: JSON.stringify(sources)
+          }
+        });
+        console.log('[LEXIA] 💾 Conversation sauvegardée');
+      } catch (error) {
+        console.error('[LEXIA] ⚠️  Erreur sauvegarde conversation:', error);
+        // Ne pas bloquer la réponse si la sauvegarde échoue
+      }
+    }
 
-    const currentSessionId = session_id || `session_${Date.now()}`;
-    const conversationId = `conv_${Date.now()}`;
-
-    // 6. SAUVEGARDER la conversation dans la base de données
-    await saveConversation({
-      sessionId: currentSessionId,
-      question,
-      answer,
-      confidence,
-      sources
-    });
-
-    console.log('[LexIA] Réponse générée avec succès');
-
+    // RETOURNER LA RÉPONSE
     return NextResponse.json({
       answer,
       sources,
-      confidence,
-      session_id: currentSessionId,
-      conversation_id: conversationId,
+      confidence: docs.length > 0 ? 0.85 : 0.5,
+      session_id: session_id || `session_${Date.now()}`,
+      conversation_id: `conv_${Date.now()}`,
       timestamp: new Date().toISOString(),
-      documents_found: relevantDocs.length
+      quota: quotaStatus
     });
 
   } catch (error: any) {
-    console.error('Erreur API Chat:', error);
+    console.error('[LEXIA] ❌ Erreur:', error);
 
     return NextResponse.json(
       {
-        error: 'Erreur lors du traitement de la requête',
+        error: 'Erreur système',
         details: error.message
       },
       { status: 500 }
     );
-  }
-}
-
-// GET pour vérifier le statut
-export async function GET() {
-  try {
-    // Compter les documents dans la base
-    const documentCount = await prisma.legalDocument.count();
-    const conversationCount = await prisma.conversation.count();
-
-    return NextResponse.json({
-      status: 'operational',
-      name: 'LexIA Chat API',
-      version: '2.0.0',
-      groq_configured: !!process.env.GROQ_API_KEY,
-      database_connected: true,
-      documents_count: documentCount,
-      conversations_count: conversationCount,
-      message: process.env.GROQ_API_KEY
-        ? `API prête ! ${documentCount} documents juridiques disponibles ✅`
-        : 'Configuration Groq nécessaire ⚠️'
-    });
-  } catch (error) {
-    return NextResponse.json({
-      status: 'error',
-      name: 'LexIA Chat API',
-      version: '2.0.0',
-      database_connected: false,
-      error: 'Erreur de connexion à la base de données'
-    }, { status: 500 });
   }
 }
